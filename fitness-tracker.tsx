@@ -7,6 +7,38 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from './card';
 
+interface Exercise {
+  id: number;
+  name: string;
+  muscle: string;
+  equipment: string;
+  difficulty: string;
+  animation: string;
+  instructions: string[];
+}
+
+interface WorkoutTemplate {
+  id: number;
+  name: string;
+  difficulty: string;
+  duration: string;
+  exercises: {
+    name: string;
+    sets: number;
+    reps: number;
+  }[];
+}
+
+interface CustomWorkout {
+  name: string;
+  difficulty: string;
+  exercises: Array<{
+    name: string;
+    sets: number;
+    reps: number;
+  }>;
+}
+
 const FitnessApp = () => {
   const [selectedTab, setSelectedTab] = useState('dashboard');
   const [showWorkoutBuilder, setShowWorkoutBuilder] = useState(false);
@@ -65,7 +97,7 @@ const FitnessApp = () => {
   ];
 
   // Sample workouts
-  const workoutTemplates = [
+  const workoutTemplates: WorkoutTemplate[] = [
     {
       id: 1,
       name: 'Full Body Blast',
@@ -79,7 +111,7 @@ const FitnessApp = () => {
   ];
 
   // Workout builder state
-  const [customWorkout, setCustomWorkout] = useState({
+  const [customWorkout, setCustomWorkout] = useState<CustomWorkout>({
     name: '',
     difficulty: 'Beginner',
     exercises: [],
@@ -127,15 +159,6 @@ const FitnessApp = () => {
       </div>
     );
   };
-  interface Exercise {
-    id: number;
-    name: string;
-    muscle: string;
-    equipment: string;
-    difficulty: string;
-    animation: string;
-    instructions: string[];
-  }
 
   const renderWorkoutBuilder = () => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
