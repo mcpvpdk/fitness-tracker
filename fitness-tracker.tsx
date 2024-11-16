@@ -10,11 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from './card';
 const FitnessApp = () => {
   const [selectedTab, setSelectedTab] = useState('dashboard');
   const [showWorkoutBuilder, setShowWorkoutBuilder] = useState(false);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
+  const [showExerciseList, setShowExerciseList] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [showScheduler, setShowScheduler] = useState(false);
-  const [selectedExercise, setSelectedExercise] = useState(null);
-  const [showExerciseList, setShowExerciseList] = useState(false);
 
   // Exercise progress data
   const exerciseProgress = {
@@ -62,7 +62,6 @@ const FitnessApp = () => {
         'Return to standing position',
       ],
     },
-    // ... more exercises
   ];
 
   // Sample workouts
@@ -77,7 +76,6 @@ const FitnessApp = () => {
         { name: 'Squats', sets: 3, reps: 12 },
       ],
     },
-    // ... more workouts
   ];
 
   // Workout builder state
@@ -98,13 +96,11 @@ const FitnessApp = () => {
               <X className="w-6 h-6" />
             </button>
           </div>
-
           <img
             src={selectedExercise.animation}
             alt={selectedExercise.name}
             className="w-full rounded-lg"
           />
-
           <div className="space-y-2">
             <p className="font-medium">Instructions:</p>
             <ol className="list-decimal list-inside space-y-1">
@@ -113,7 +109,6 @@ const FitnessApp = () => {
               ))}
             </ol>
           </div>
-
           <div className="grid grid-cols-3 gap-4 text-sm">
             <div>
               <p className="font-medium">Muscle Group</p>
@@ -132,14 +127,55 @@ const FitnessApp = () => {
       </div>
     );
   };
+  interface Exercise {
+    id: number;
+    name: string;
+    muscle: string;
+    equipment: string;
+    difficulty: string;
+    animation: string;
+    instructions: string[];
+  }
 
   const renderWorkoutBuilder = () => (
-    // Your workout builder component code here
-    <div>Workout Builder</div>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full p-6 space-y-4">
+        <div className="flex justify-between items-center">
+          <h3 className="text-xl font-bold">Create Custom Workout</h3>
+          <button onClick={() => setShowWorkoutBuilder(false)}>
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <div className="space-y-4">
+          <input
+            type="text"
+            placeholder="Workout Name"
+            className="w-full px-4 py-2 border rounded-lg"
+            value={customWorkout.name}
+            onChange={(e) => setCustomWorkout({...customWorkout, name: e.target.value})}
+          />
+          <select
+            className="w-full px-4 py-2 border rounded-lg"
+            value={customWorkout.difficulty}
+            onChange={(e) => setCustomWorkout({...customWorkout, difficulty: e.target.value})}
+          >
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+          </select>
+          <button
+            onClick={() => setShowExerciseList(true)}
+            className="w-full flex items-center justify-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            <Plus className="w-5 h-5" />
+            <span>Add Exercise</span>
+          </button>
+        </div>
+      </div>
+    </div>
   );
 
   const renderScheduler = () => (
-    // Your scheduler component code here
     <div>Scheduler</div>
   );
 
@@ -157,18 +193,8 @@ const FitnessApp = () => {
               <YAxis />
               <Tooltip />
               <Legend />
-              <Line
-                type="monotone"
-                dataKey="reps"
-                stroke="#2563eb"
-                name="Reps"
-              />
-              <Line
-                type="monotone"
-                dataKey="weight"
-                stroke="#16a34a"
-                name="Weight (lbs)"
-              />
+              <Line type="monotone" dataKey="reps" stroke="#2563eb" name="Reps" />
+              <Line type="monotone" dataKey="weight" stroke="#16a34a" name="Weight (lbs)" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -178,7 +204,6 @@ const FitnessApp = () => {
 
   const renderWorkouts = () => (
     <div className="space-y-6">
-      {/* Search and Filter Bar */}
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[200px]">
           <div className="relative">
@@ -192,7 +217,6 @@ const FitnessApp = () => {
             />
           </div>
         </div>
-
         <select
           className="px-4 py-2 border rounded-lg"
           value={selectedDifficulty}
@@ -203,7 +227,6 @@ const FitnessApp = () => {
           <option value="Intermediate">Intermediate</option>
           <option value="Advanced">Advanced</option>
         </select>
-
         <button
           onClick={() => setShowWorkoutBuilder(true)}
           className="flex items-center space-x-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
@@ -212,14 +235,11 @@ const FitnessApp = () => {
           <span>Create Workout</span>
         </button>
       </div>
-
-      {/* Workout Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {workoutTemplates
           .filter(
             (workout) =>
-              (selectedDifficulty === 'all' ||
-                workout.difficulty === selectedDifficulty) &&
+              (selectedDifficulty === 'all' || workout.difficulty === selectedDifficulty) &&
               workout.name.toLowerCase().includes(searchTerm.toLowerCase())
           )
           .map((workout) => (
@@ -238,17 +258,12 @@ const FitnessApp = () => {
                     <Clock className="w-4 h-4" />
                     <span>{workout.duration}</span>
                   </div>
-
                   <div className="space-y-2">
                     {workout.exercises.map((exercise, index) => (
                       <div
                         key={index}
                         className="flex justify-between items-center p-2 bg-gray-50 rounded cursor-pointer hover:bg-gray-100"
-                        onClick={() =>
-                          setSelectedExercise(
-                            exerciseLibrary.find((e) => e.name === exercise.name)
-                          )
-                        }
+                        onClick={() => setSelectedExercise(exerciseLibrary.find((e) => e.name === exercise.name))}
                       >
                         <span>{exercise.name}</span>
                         <div className="flex items-center space-x-1 text-sm text-gray-600">
@@ -287,14 +302,11 @@ const FitnessApp = () => {
 
   return (
     <div className="p-6">
-      {/* Navbar */}
       <nav className="flex space-x-4">
         <button
           onClick={() => setSelectedTab('dashboard')}
           className={`px-4 py-2 rounded ${
-            selectedTab === 'dashboard'
-              ? 'bg-blue-500 text-white'
-              : 'hover:bg-gray-100'
+            selectedTab === 'dashboard' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
           }`}
         >
           Dashboard
@@ -302,9 +314,7 @@ const FitnessApp = () => {
         <button
           onClick={() => setSelectedTab('workouts')}
           className={`px-4 py-2 rounded ${
-            selectedTab === 'workouts'
-              ? 'bg-blue-500 text-white'
-              : 'hover:bg-gray-100'
+            selectedTab === 'workouts' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
           }`}
         >
           Workouts
@@ -312,20 +322,15 @@ const FitnessApp = () => {
         <button
           onClick={() => setSelectedTab('progress')}
           className={`px-4 py-2 rounded ${
-            selectedTab === 'progress'
-              ? 'bg-blue-500 text-white'
-              : 'hover:bg-gray-100'
+            selectedTab === 'progress' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100'
           }`}
         >
           Progress
         </button>
       </nav>
-
-      {/* Content */}
       <div className="mt-6">
         {selectedTab === 'dashboard' && (
           <div>
-            {/* Dashboard content */}
             {renderExerciseProgress()}
           </div>
         )}
